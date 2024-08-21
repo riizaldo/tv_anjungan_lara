@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TV | Anjungan Rektorat</title>
+    <title id="tittle_up">TV | Anjungan Rektorat</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
@@ -95,14 +95,16 @@
     </style>
 </head>
 
+
 <body
-    style="background-image: url('https://mdbcdn.b-cdn.net/img/new/fluid/nature/015.webp'); height: 100%;background-repeat: no-repeat;background-size: cover;background-position: center;">
+    style="background-image: url({{ asset($bg->path) }}); height: 100%;background-repeat: no-repeat;background-size: cover;background-position: center;"
+    id="bg_image">
 
 
     <div class="container-fluid">
         <div class="row py-2">
             <div class="col-md-12">
-                <div style="background: rgba(0, 0, 0, 0.5); color: white;">
+                <div style="background: rgba(0, 0, 0, 0.5); color: white;" id="judul_atas">
                     <h1 class="text text-center py-4"><b style="font-size: 44px;"> {!! $judul !!}</b></h1>
                 </div>
             </div>
@@ -165,19 +167,13 @@
                     <div class="card-body">
                         <div id="carouselExample" class="carousel slide" data-bs-ride="carousel"
                             data-bs-interval="5000">
-                            <div class="carousel-inner">
-                                <div class="carousel-item active">
-                                    <img src="{{ asset('img_tes/slider/1.png') }}" class="d-block w-100" alt="1"
-                                        style="max-height:450px">
-                                </div>
-                                <div class="carousel-item">
-                                    <img src="{{ asset('img_tes/slider/2.png') }}" class="d-block w-100" alt="2"
-                                        style="max-height:450px">
-                                </div>
-                                <div class="carousel-item">
-                                    <img src="{{ asset('img_tes/slider/3.png') }}" class="d-block w-100" alt="3"
-                                        style="max-height:450px">
-                                </div>
+                            <div class="carousel-inner" id="carouselSlider">
+                                @foreach ($slider as $index => $sd)
+                                    <div class="carousel-item {{ $index === 0 ? 'active' : '' }}">
+                                        <img src="{{ asset($sd->path) }}" class="d-block w-100"
+                                            alt="{{ $sd->name }}" style="max-height:450px">
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
                     </div>
@@ -227,17 +223,14 @@
                     </div>
                 </div>
 
-                <div class="row d-flex justify-content-center">
-                    <div class="col-4 d-flex justify-content-center">
-                        <img src="{{ asset('img_tes/logo/logo.png') }}" style="height:100px ;" alt="Logo Unwahas">
-                    </div>
-                    <div class="col-4 d-flex justify-content-center">
-                        <img src="{{ asset('img_tes/logo/LOGOGAU3L.png') }}" style="height:100px" alt="Gaulfm">
-                    </div>
-                    <div class="col-4 d-flex justify-content-center">
-                        <img src="{{ asset('img_tes/logo/LOGOUNWAHASTV(3).png') }}" style="height:100px ;"
-                            alt="Unwahas TV">
-                    </div>
+                <div class="row d-flex justify-content-center" id="logo">
+
+                    @foreach ($logo as $lg)
+                        <div class="col-4 d-flex justify-content-center">
+                            <img src="{{ asset($lg->path) }}" style="height:100px ;" alt="{{ $lg->name }}">
+                        </div>
+                    @endforeach
+
                 </div>
             </div>
         </footer>
@@ -247,6 +240,11 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
     {{-- Support kami dengan follow sosial media resmi kami, Youtube : <i>UnwahasTV<i> dan Instagram <i>@unwahasaja</i> --}}
     <script>
+        let lastSliderData = [];
+        const bgImageUrl = "{{ asset($bg->path) }}";
+        let lastBgImageUrl = bgImageUrl;
+
+
         function fetchfooter() {
             $.ajax({
                 url: '/get-footer',
@@ -260,6 +258,104 @@
                             '</li>'
                         );
                     });
+                },
+                error: function(xhr) {
+                    console.error('Error fetching data:', xhr);
+                }
+            });
+        }
+
+        function fetchLogo() {
+            $.ajax({
+                url: '/get-logo',
+                method: 'GET',
+                success: function(data) {
+                    $('#logo').empty();
+
+                    // Ensure data is an array
+                    if (Array.isArray(data)) {
+                        data.forEach(function(logo) {
+                            // Append the logo image and description
+                            $('#logo').append(
+                                '<div class="col-4 d-flex justify-content-center">' +
+                                '<img src="' + logo.path + '" style="height:100px;" alt="' + logo
+                                .name + '">' +
+                                '</div>'
+                            );
+                        });
+                    } else {
+                        console.error('Unexpected data format:', data);
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Error fetching data:', xhr);
+                }
+            });
+        }
+
+        function arraysEqual(arr1, arr2) {
+            if (arr1.length !== arr2.length) return false;
+
+            for (let i = 0; i < arr1.length; i++) {
+                if (JSON.stringify(arr1[i]) !== JSON.stringify(arr2[i])) return false;
+            }
+            return true;
+        }
+
+        function fetchBg() {
+            $.ajax({
+                url: '/get-bg',
+                method: 'GET',
+                success: function(data) {
+                    // Memeriksa format data
+                    if (data && typeof data.path === 'string') {
+                        const newBgImageUrl = data.path;
+
+                        // Periksa apakah URL baru berbeda dari URL yang lama
+                        if (lastBgImageUrl !== newBgImageUrl) {
+                            document.getElementById('bg_image').style.backgroundImage = `url(${newBgImageUrl})`;
+                            lastBgImageUrl = newBgImageUrl;
+                        }
+                    } else {
+                        console.error('Unexpected data format:', data);
+                    }
+                },
+                error: function(xhr) {
+                    console.error('Error fetching data:', xhr);
+                }
+            });
+        }
+
+        function fetchSlider() {
+            $.ajax({
+                url: '/get-slider',
+                method: 'GET',
+                success: function(data) {
+                    // Jika data adalah array, lanjutkan
+                    if (Array.isArray(data)) {
+                        // Cek apakah data slider baru berbeda dari data lama
+                        if (!arraysEqual(data, lastSliderData)) {
+                            // Perbarui cache dengan data baru
+                            lastSliderData = data;
+
+                            // Kosongkan slider dan tambahkan item baru
+                            $('#carouselSlider').empty();
+
+                            data.forEach(function(logo, index) {
+                                var isActive = index === 0 ? 'active' : '';
+
+                                // Append the logo image and description
+                                $('#carouselSlider').append(
+                                    '<div class="carousel-item ' + isActive + '">' +
+                                    '<img src="' + logo.path + '" class="d-block w-100" alt="' +
+                                    logo.name + '" style="max-height:450px">' +
+                                    '</div>'
+                                );
+                            });
+                        }
+                    } else {
+                        console.error('Unexpected data format:', data);
+                    }
                 },
                 error: function(xhr) {
                     console.error('Error fetching data:', xhr);
@@ -347,6 +443,7 @@
             });
         }
         // const scrollContent = document.querySelector('.scroll-content');
+        const logo = document.querySelector('#logo');
         const scrollContent1 = document.querySelector('#categoryTable1');
         const scrollContent2 = document.querySelector('#categoryTable2');
         const running_textfooter = document.querySelector('#running_textfooter');
@@ -369,15 +466,17 @@
             });
         });
 
+        function updateAllData() {
+            fetchAndUpdateData();
+            fetchAndUpdateData2();
+            fetchLogo();
+            fetchfooter();
+            fetchBg();
+            fetchSlider();
+        }
 
-
-        setInterval(fetchAndUpdateData, 2000);
-        setInterval(fetchAndUpdateData2, 2000);
-
-        fetchAndUpdateData();
-        fetchAndUpdateData2();
-        fetchfooter();
-        setInterval(fetchfooter, 2000);
+        updateAllData();
+        setInterval(updateAllData, 2000);
     </script>
 </body>
 

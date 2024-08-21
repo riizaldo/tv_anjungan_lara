@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\KegiatanUpdated;
 use App\Models\MasterJenisText;
 use App\Models\MasterKegiatan;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Laracasts\Utilities\JavaScript\JavaScriptFacade;
@@ -44,7 +45,12 @@ class MasterKegiatanController extends Controller
     }
     public function getKegiatanUniv()
     {
-        $kegiatan_univ = MasterKegiatan::where('tipe', 'frame_1')->orderBy('start_date', 'asc')->get();
+        $now = Carbon::now();
+        $kegiatan_univ = MasterKegiatan::where('tipe', 'frame_1')
+            ->where('start_date', '<=', $now)
+            ->where('end_date', '>=', $now)
+            ->orderBy('start_date', 'asc')
+            ->get();
 
         return response()->json($kegiatan_univ);
     }
@@ -56,7 +62,11 @@ class MasterKegiatanController extends Controller
     }
     public function getKegiatanFak()
     {
-        $kegiatan_fak = MasterKegiatan::where('tipe', 'frame_2')->orderBy('start_date', 'asc')->get();
+        $now = Carbon::now();
+        $kegiatan_fak = MasterKegiatan::where('tipe', 'frame_2')->where('start_date', '<=', $now)
+            ->where('end_date', '>=', $now)
+            ->orderBy('start_date', 'asc')
+            ->get();
 
         return response()->json($kegiatan_fak);
     }

@@ -18,6 +18,9 @@
             <li class="submenu-item">
                 <a href="/master-kegiatan" class="submenu-link">Setting Kegiatan</a>
             </li>
+            <li class="submenu-item">
+                <a href="/master-gambar" class="submenu-link">Setting Gambar</a>
+            </li>
         </ul>
     </li>
 </ul>

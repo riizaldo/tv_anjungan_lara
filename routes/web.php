@@ -5,6 +5,7 @@ use App\Http\Controllers\MasterJenisTextController;
 use App\Http\Controllers\MasterKegiatanController;
 use App\Http\Controllers\MasterTimerController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SettingGambarController;
 use App\Models\MasterJenisText;
 use Illuminate\Support\Facades\Route;
 
@@ -21,6 +22,13 @@ Route::resource('/master-text', MasterJenisTextController::class)->except(['crea
 // Master timer
 Route::post('/master-timer/data', [MasterTimerController::class, 'data'])->middleware(['auth', 'verified']);
 Route::resource('/master-timer', MasterTimerController::class)->except(['create', 'edit'])->middleware(['auth', 'verified']);
+
+// Master Gambar
+Route::post('/master-gambar/data', [SettingGambarController::class, 'data'])->middleware(['auth', 'verified']);
+Route::get('/get-logo', [SettingGambarController::class, 'getlogo']);
+Route::get('/get-slider', [SettingGambarController::class, 'getSlider']);
+Route::get('/get-bg', [SettingGambarController::class, 'bg']);
+Route::resource('/master-gambar', SettingGambarController::class)->except(['create', 'edit'])->middleware(['auth', 'verified']);
 
 // Master timer
 Route::post('/master-kegiatan/data', [MasterKegiatanController::class, 'data'])->middleware(['auth', 'verified']);

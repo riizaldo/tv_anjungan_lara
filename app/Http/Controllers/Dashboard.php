@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\MasterJenisText;
 use App\Models\MasterKegiatan;
 use App\Models\MasterTimer;
+use App\Models\SettingGambar;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Laracasts\Utilities\JavaScript\JavaScriptFacade;
 
 class Dashboard extends Controller
@@ -38,6 +40,7 @@ class Dashboard extends Controller
     }
     public function welcome()
     {
+        $now = Carbon::now();
         $menu = 'Dashboard';
         $submenu = null;
         $title = 'Dashboard';
@@ -52,8 +55,18 @@ class Dashboard extends Controller
         $frame2_time = MasterTimer::where('tipe', 'frame2')->pluck('timer')->first();
         $footer_time = MasterTimer::where('tipe', 'footer')->pluck('timer')->first();
 
-        $kegiatan_univ = MasterKegiatan::where('tipe', 'frame_1')->orderBy('start_date', 'asc')->get();
-        $kegiatan_fak = MasterKegiatan::where('tipe', 'frame_2')->orderBy('start_date', 'asc')->get();
+        $kegiatan_univ = MasterKegiatan::where('tipe', 'frame_1')->where('start_date', '<=', $now)
+            ->where('end_date', '>=', $now)
+            ->orderBy('start_date', 'asc')
+            ->get();
+        $kegiatan_fak = MasterKegiatan::where('tipe', 'frame_2')->where('start_date', '<=', $now)
+            ->where('end_date', '>=', $now)
+            ->orderBy('start_date', 'asc')
+            ->get();
+
+        $logo = SettingGambar::where('tipe', 'logo')->orderBy('id', 'asc')->get();
+        $slider = SettingGambar::where('tipe', 'frame_3')->orderBy('id', 'asc')->get();
+        $bg = SettingGambar::where('tipe', 'bg')->orderBy('id', 'desc')->first();
 
         JavaScriptFacade::put([
             'menu' => $menu,
@@ -72,9 +85,13 @@ class Dashboard extends Controller
 
             'kegiatan_univ' => $kegiatan_univ,
             'kegiatan_fak' => $kegiatan_fak,
+
+            'slider' => $slider,
+            'logo' => $logo,
+            'bg' => $bg,
         ]);
 
-        return view('welcome', compact('menu', 'submenu', 'title', 'judul', 'link_youtube', 'frame1', 'frame2', 'footer', 'frame1_time', 'frame2_time', 'frame3_time', 'footer_time', 'kegiatan_univ', 'kegiatan_fak'));
+        return view('welcome', compact('menu', 'submenu', 'title', 'judul', 'link_youtube', 'frame1', 'frame2', 'footer', 'frame1_time', 'frame2_time', 'frame3_time', 'footer_time', 'kegiatan_univ', 'kegiatan_fak', 'logo', 'slider', 'bg'));
     }
 
     /**
