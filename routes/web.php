@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Route;
 // });
 Route::get('/', [Dashboard::class, 'welcome']);
 Route::get('/dashboard', [Dashboard::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/get-monthly-activities', [Dashboard::class, 'getMonthlyActivities']);
+Route::post('/get-kegiatan-tomorow/data', [Dashboard::class, 'getkegiatantomorow']);
+Route::post('/get-kegiatan-now/data', [Dashboard::class, 'getkegiatannow']);
 
 // Master text
 Route::post('/master-text/data', [MasterJenisTextController::class, 'data'])->middleware(['auth', 'verified']);
@@ -35,6 +38,7 @@ Route::post('/master-kegiatan/data', [MasterKegiatanController::class, 'data'])-
 Route::get('/get-kegiatan-univ', [MasterKegiatanController::class, 'getKegiatanUniv']);
 Route::get('/get-kegiatan-fak', [MasterKegiatanController::class, 'getKegiatanFak']);
 Route::get('/get-footer', [MasterKegiatanController::class, 'getfooter']);
+
 Route::resource('/master-kegiatan', MasterKegiatanController::class)->except(['create', 'edit'])->middleware(['auth', 'verified']);
 
 // Route::get('/dashboard', function () {
